@@ -1,3 +1,13 @@
+if os.getenv "LOCAL_LUA_DEBUGGER_VSCODE" == "1" then
+    local lldebugger = require "lldebugger"
+    lldebugger.start()
+    local run = love.run
+    function love.run(...)
+        local f = lldebugger.call(run, false, ...)
+        return function(...) return lldebugger.call(f, false, ...) end
+    end
+end
+
 love.graphics.setDefaultFilter('nearest', 'nearest')
 local screenW, screenH = love.graphics.getDimensions()
 local cookieClicks = 0
