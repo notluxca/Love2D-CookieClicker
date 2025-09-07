@@ -10,13 +10,27 @@ end
 
 love.graphics.setDefaultFilter('nearest', 'nearest')
 local screenW, screenH = love.graphics.getDimensions()
-local cookieClicks = 0
+local AllCookieClicks = 0;
+local currentCookieClicks = 0
 local angle = 0
-local rotationSpeed = 0.2;
+local rotationSpeed = 0;
+local clickRotationPower = 0.4;
 
 local scale = 1
 local targetScale = 1
 local popSpeed = 1.5
+
+local clickUpgradeCost = 50;
+local currentClickPower = 2
+
+local SpinUpgradeCost = 100;
+local SpiningCurrencyUnlocked = false
+
+
+-- power ups
+-- Increase Cokie production
+-- Unlock Spining production (the cookie generate clicks while rotating
+
 
 function love.load()
     -- init something here ...
@@ -34,9 +48,24 @@ function love.keypressed(key)
     if key == 'escape' then
         love.event.quit()
     end
-    if key == "space" then
-        cookieClicks = cookieClicks + 1 -- updating
-        targetScale = 1.15              --
+    if key == '1' then
+        if currentCookieClicks > clickUpgradeCost then
+            currentCookieClicks = currentCookieClicks - clickUpgradeCost
+            currentClickPower = currentClickPower + 3
+            clickUpgradeCost = clickUpgradeCost * 2
+        end
+    end
+    if key == '2' then
+        if SpiningCurrencyUnlocked == false and currentCookieClicks > 300 then
+            currentCookieClicks = currentCookieClicks - 300
+            SpiningCurrencyUnlocked = true
+        else
+            if currentCookieClicks > SpinUpgradeCost then
+                currentCookieClicks = currentCookieClicks - SpinUpgradeCost
+                SpinUpgradeCost = SpinUpgradeCost * 2
+                clickRotationPower = clickRotationPower + 0.2;
+            end
+        end
     end
 
     love.keyboard.keysPressed[key] = true
@@ -50,12 +79,8 @@ function love.update(dt)
     -- change some values based on your actions
     love.keyboard.keysPressed = {}
 
-    if love.keyboard.isDown("space") then
-        rotationSpeed = rotationSpeed + 0.4
-    else
-        if rotationSpeed > 0 then
-            rotationSpeed = rotationSpeed * (1 - 3 / 100)
-        end
+    if rotationSpeed > 0 then
+        rotationSpeed = rotationSpeed * (1 - 3 / 100)
     end
 
     -- animação de scale suavizada (volta para 1 quando POP terminar)
@@ -71,6 +96,9 @@ function love.update(dt)
     end
 
     angle = angle + rotationSpeed * dt
+    if angle > 0.3 and SpiningCurrencyUnlocked then
+        currentCookieClicks = currentCookieClicks + 0.1;
+    end
 end
 
 function love.mousepressed(xMouseCordinate, yMouseCordinate, button)
@@ -83,7 +111,9 @@ function love.mousepressed(xMouseCordinate, yMouseCordinate, button)
 
         local distance = math.sqrt(distanceX * distanceX + distanceY * distanceY)
         if distance <= radius then
-            cookieClicks = cookieClicks + 1 -- updating
+            currentCookieClicks = currentCookieClicks + currentClickPower -- updating
+            AllCookieClicks = AllCookieClicks + currentClickPower
+            rotationSpeed = rotationSpeed + clickRotationPower
             targetScale = 1.15
         end
     end
@@ -91,13 +121,27 @@ end
 
 function love.draw()
     -- draw your stuff here
-    love.graphics.print('Cookie Clicks: ' .. cookieClicks, screenW / 2 - 50, (screenH / 2) - 200, 0, 1, 1, 0, 0)
+    love.graphics.print('1 - Double click power - ' .. clickUpgradeCost .. " Cookies", 10, 10, 0, 1, 1, 0, 0)
+
+    if SpiningCurrencyUnlocked == false then
+        love.graphics.print('2 - Unlock spining currency - 300 Cookies', 10, 25, 0, 1, 1, 0, 0)
+    else
+        love.graphics.print('2 - Increase Spinning force - ' .. SpinUpgradeCost .. "Cookies", 10, 25, 0, 1, 1, 0, 0)
+    end
+
+
+    love.graphics.print('Current click force: ' .. currentClickPower, 10, 50, 0, 1, 1, 0, 0)
+    love.graphics.print('Spinning force: ' .. clickRotationPower, 10, 65, 0, 1, 1, 0, 0)
+
+    love.graphics.print('All Cookies: ' .. AllCookieClicks, screenW / 2 - 40, (screenH / 2) - 215, 0, 1, 1, 0, 0)
+    love.graphics.print('Cookie Clicks: ' .. math.ceil(currentCookieClicks), screenW / 2 - 50, (screenH / 2) - 200, 0, 1,
+        1, 0, 0)
     love.graphics.draw(
         cookie,
         screenW / 2,
         screenH / 2,
-        angle,                 -- rotation
-        scale, scale,          -- agora usa scale!
+        angle, -- rotation
+        scale, scale,
         cookie:getWidth() / 2,
         cookie:getHeight() / 2 -- origin = center
     )
