@@ -36,6 +36,7 @@ function love.load()
     -- init something here ...
     love.window.setTitle('Cookie Clicker')
     cookie = love.graphics.newImage("Assets/Cookie.png")
+    background = love.graphics.newImage("Assets/background.jpg")
 
     love.keyboard.keysPressed = {}
 end
@@ -51,8 +52,8 @@ function love.keypressed(key)
     if key == '1' then
         if currentCookieClicks > clickUpgradeCost then
             currentCookieClicks = currentCookieClicks - clickUpgradeCost
-            currentClickPower = currentClickPower + 3
-            clickUpgradeCost = clickUpgradeCost * 2
+            currentClickPower = currentClickPower * 1.5
+            clickUpgradeCost = clickUpgradeCost * 1.2
         end
     end
     if key == '2' then
@@ -62,7 +63,7 @@ function love.keypressed(key)
         else
             if currentCookieClicks > SpinUpgradeCost then
                 currentCookieClicks = currentCookieClicks - SpinUpgradeCost
-                SpinUpgradeCost = SpinUpgradeCost * 2
+                SpinUpgradeCost = SpinUpgradeCost * 1.2
                 clickRotationPower = clickRotationPower + 0.2;
             end
         end
@@ -120,20 +121,25 @@ function love.mousepressed(xMouseCordinate, yMouseCordinate, button)
 end
 
 function love.draw()
+    love.graphics.draw(background, 0, 0, 0, screenW / background:getWidth(),
+        screenH / background:getHeight()) -- draw background
+
     -- draw your stuff here
-    love.graphics.print('1 - Double click power - ' .. clickUpgradeCost .. " Cookies", 10, 10, 0, 1, 1, 0, 0)
+    love.graphics.print('1 - Double click power - ' .. math.abs(clickUpgradeCost) .. " Cookies", 10, 10, 0, 1, 1, 0, 0)
 
     if SpiningCurrencyUnlocked == false then
         love.graphics.print('2 - Unlock spining currency - 300 Cookies', 10, 25, 0, 1, 1, 0, 0)
     else
-        love.graphics.print('2 - Increase Spinning force - ' .. SpinUpgradeCost .. "Cookies", 10, 25, 0, 1, 1, 0, 0)
+        love.graphics.print('2 - Increase Spinning force - ' .. math.abs(SpinUpgradeCost) .. " Cookies", 10, 25, 0, 1, 1,
+            0, 0)
     end
 
 
-    love.graphics.print('Current click force: ' .. currentClickPower, 10, 50, 0, 1, 1, 0, 0)
-    love.graphics.print('Spinning force: ' .. clickRotationPower, 10, 65, 0, 1, 1, 0, 0)
+    love.graphics.print('Current click force: ' .. math.abs(currentClickPower), 10, 50, 0, 1, 1, 0, 0)
+    love.graphics.print('Spinning force: ' .. math.abs(clickRotationPower), 10, 65, 0, 1, 1, 0, 0)
 
-    love.graphics.print('All Cookies: ' .. AllCookieClicks, screenW / 2 - 40, (screenH / 2) - 215, 0, 1, 1, 0, 0)
+    love.graphics.print('All Cookies: ' .. math.abs(AllCookieClicks), screenW / 2 - 40, (screenH / 2) - 215, 0, 1, 1, 0,
+        0)
     love.graphics.print('Cookie Clicks: ' .. math.ceil(currentCookieClicks), screenW / 2 - 50, (screenH / 2) - 200, 0, 1,
         1, 0, 0)
     love.graphics.draw(
